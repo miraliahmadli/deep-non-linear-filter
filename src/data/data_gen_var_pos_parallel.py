@@ -102,7 +102,8 @@ class RoomSimulation:
         :param x: x pos
         :param y: y pos
         :param z: z pos
-        :param phi: The counterclockwise rotation of the first element in the array (from the x-axis)
+        :param phi: The counterclockwise rotation of the 
+                    first element in the array (from the x-axis)
         :return:
         """
         if self.channels == 2:
@@ -201,20 +202,28 @@ class SPRoomSimulator:
         return_dict: dict = {},
     ):
         """
-        Create for a list of speech signals (first one is the target signal) the spatial image using a randomly placed
-        microphone array and distributing the interfering speakers (len(speaker_list)-1) uniformly around the array.
+        Create for a list of speech signals (first one is the target signal) the spatial image using a
+        randomly placed microphone array and distributing the interfering speakers
+        (len(speaker_list)-1) uniformly around the array.
 
         :param speaker_list: List of paths to speaker utterances
         :param seed2: Seed for the random audio files and positions
         :param target_angle: The DOA of the target speaker in degree.
         :param reverb: Create reverberant signals
-        :param rt60_min, rt60_mx: The RT60 is sampled uniformly from the range (rt60_min, rt60_max)
-        :param snr: The SNR is sampled uniformly from the range (snr_min, snr_max). The noise signal is rescaled to match the chosen SNR. If snr_min is None, no rescaling is performed.
-        :param min_dist, max_dist: The range (min_dist, max_dist) from which the sources (also interfering sources) are sampled uniformly. Unit is meters.
-        :param mic_pert_std: Add noise to the microphone positions sampled from a Gaussian with zero mean and specified standard deviation. Unit is cm.
-        :param min_angle_dist: Minimum angle distance between two sources (target-interfering and interfering-interfering)
+        :param rt60_min, rt60_max: The RT60 is sampled uniformly from the range (rt60_min,
+            rt60_max)
+        :param snr: The SNR is sampled uniformly from the range (snr_min, snr_max). The noise
+            signal is rescaled to match the chosen SNR. If snr_min is None, no rescaling is
+            performed.
+        :param min_dist, max_dist: The range (min_dist, max_dist) from which the sources (also
+            interfering sources) are sampled uniformly. Unit is meters.
+        :param mic_pert_std: Add noise to the microphone positions sampled from a Gaussian with
+            zero mean and specified standard deviation. Unit is cm.
+        :param min_angle_dist: Minimum angle distance between two sources
+            (target-interfering and interfering-interfering)
 
-        :return: the audio signals as numpy array [N_SPEAKERS, N_CHANNELS, N_SAMPLES] and corresponding meta data
+        :return: the audio signals as numpy array [N_SPEAKERS, N_CHANNELS, N_SAMPLES] and
+            corresponding meta data
         """
         # set seed for this sample
         rng = np.random.default_rng(seed2)
@@ -405,8 +414,8 @@ def normal_vec(phi):
 
 def snr_scale_factor(speech: np.ndarray, noise: np.ndarray, snr: int):
     """
-    Compute the scale factor that has to be applied to a noise signal in order for the noisy (sum of noise and clean)
-    to have the specified SNR.
+    Compute the scale factor that has to be applied to a noise signal
+    in order for the noisy (sum of noise and clean) to have the specified SNR.
 
     :param speech: the clean speech signal [..., SAMPLES]
     :param noise: the noise signal [..., SAMPLES]
@@ -446,20 +455,22 @@ def prep_speaker_mix_data(
     batch_size=300,
 ):
     """
-    Preparation of speaker mix dataset. The target speaker is placed in a fixed position relative to the microphone
-    array. The interfering speakers are placed randomly with one speaker per angle segment.
+    Preparation of speaker mix dataset. The target speaker is placed in a fixed position
+    relative to the microphone array. The interfering speakers are placed randomly with one
+    speaker per angle segment.
 
-    If angle_settings are provided, the function can also create a dataset with a moving speaker placed
-    on a range of angles.
+    If angle_settings are provided, the function can also create a dataset with a moving
+    speaker placed on a range of angles.
 
     :param store_dir: path to directory in which to store the dataset
     :param post_fix: postfix to specify the characteristics of the dataset
-    :param wsj0_path: path the the raw WSJ0 data
+    :param wsj0_path: path to the raw WSJ0 data
     :param n_channels: number of channels in the microphone array
     :param n_interfering_speakers: the number of interfering speakers
     :param target_fs: the target sampling rate for the dataset
     :param num_files: a dictionary specifying the number of examples per stage
-    :param angle_settings: a dict {'start': -45, 'stop': 45, 'step': 1, 'n_samples_per_angle': 100}
+    :param angle_settings: a dict {'start': -45, 'stop': 45, 'step': 1, 
+                 'n_samples_per_angle': 100}
     :param reverb: turn off reverberation if set to False
     :param rt60_min: min RT60 time (uniformly sampled if reverb)
     :param rt60_max: max RT60 time (uniformly sampled if reverb)
@@ -499,14 +510,16 @@ def prep_speaker_mix_data(
             angle_step = angle_settings['step']
 
             MAX_SAMPLES_PER_FILE = 12 * target_fs
-            audio_dataset = prep_storage.create_dataset(data_set,
-                                                        shape=(
-                                                            n_dataset_samples_full, 3, n_channels, MAX_SAMPLES_PER_FILE),
-                                                        chunks=(
-                                                            1, 3, n_channels, MAX_SAMPLES_PER_FILE),
-                                                        dtype=np.float32,
-                                                        compression="gzip",
-                                                        shuffle=True)
+            audio_dataset = prep_storage.create_dataset(
+                data_set,
+                shape=(
+                    n_dataset_samples_full, 3, n_channels, MAX_SAMPLES_PER_FILE),
+                chunks=(
+                    1, 3, n_channels, MAX_SAMPLES_PER_FILE),
+                dtype=np.float32,
+                compression="gzip",
+                shuffle=True
+            )
 
             set_meta = {}
 
@@ -547,7 +560,10 @@ def prep_speaker_mix_data(
                     target_indices=target_indices[i: i+batch_size],
                 )
                 print("Batch done")
-                for j, (reverb_target_signal, noise_signal, dry_target_signal, sample_meta, target_idx) in enumerate(results):
+                for j, (reverb_target_signal,
+                        noise_signal,
+                        dry_target_signal,
+                        sample_meta, target_idx) in enumerate(results):
                     val = indices[i+j]
                     n_audio_samples = min(
                         sample_meta['n_samples'], MAX_SAMPLES_PER_FILE)
