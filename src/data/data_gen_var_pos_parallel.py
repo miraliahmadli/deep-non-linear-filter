@@ -88,7 +88,14 @@ class RoomSimulation:
         """
         self.set_room_properties(self.rt60_tgt, self.room_dim)
 
-    def set_microphones(self, x: float, y: float, z: float, phi: float, mic_offset: np.ndarray):
+    def set_microphones(
+        self,
+        x: float,
+        y: float,
+        z: float,
+        phi: float,
+        mic_offset: np.ndarray,
+    ):
         """
         Add microphone array at position xyz with rotation phi
         Radius: 0.05 m
@@ -175,22 +182,24 @@ class SPRoomSimulator:
         self.dry_room = RoomSimulation(num_channels=self.channels)
         self.fs = 16000
 
-    def create_sample(self,
-                      speaker_list: List[str],
-                      seed2: int,
-                      target_angle: float = 0,
-                      reverb: bool = True,
-                      rt60_min: float = 0.2,
-                      rt60_max: float = 1,
-                      snr_min: int = -10,
-                      snr_max: int = 5,
-                      min_dist=0.8,
-                      max_dist=1.2,
-                      mic_pert_std: float = 0,
-                      min_angle_dist: int = 10,
-                      target_idx: int = 0,
-                      return_dict_idx: int = 0,
-                      return_dict: dict = {}):
+    def create_sample(
+        self,
+        speaker_list: List[str],
+        seed2: int,
+        target_angle: float = 0,
+        reverb: bool = True,
+        rt60_min: float = 0.2,
+        rt60_max: float = 1,
+        snr_min: int = -10,
+        snr_max: int = 5,
+        min_dist=0.8,
+        max_dist=1.2,
+        mic_pert_std: float = 0,
+        min_angle_dist: int = 10,
+        target_idx: int = 0,
+        return_dict_idx: int = 0,
+        return_dict: dict = {},
+    ):
         """
         Create for a list of speech signals (first one is the target signal) the spatial image using a randomly placed
         microphone array and distributing the interfering speakers (len(speaker_list)-1) uniformly around the array.
@@ -296,7 +305,8 @@ class SPRoomSimulator:
                     too_close = False
                     speaker_phis.append(speaker_phi)
                 else:
-                    if speaker_phi - speaker_phis[-1] < np.deg2rad(min_angle_dist) or (speaker_phis[0] + 2*np.pi) - speaker_phi < np.deg2rad(min_angle_dist):
+                    if speaker_phi - speaker_phis[-1] < np.deg2rad(min_angle_dist) or\
+                            (speaker_phis[0] + 2*np.pi) - speaker_phi < np.deg2rad(min_angle_dist):
                         # previous speaker or first speaker too close
                         too_close = True
                     else:
@@ -334,20 +344,21 @@ class SPRoomSimulator:
         return reverb_target_signal, noise_signal, target_signal, meta, target_idx
 
     def create_samples(
-            self,
-            speaker_lists: List[List[str]],
-            seeds: List[int],
-            target_angles: List[float] = [0.0],
-            reverb: bool = True,
-            rt60_min: float = 0.2,
-            rt60_max: float = 1,
-            snr_min: int = -10,
-            snr_max: int = 5,
-            mic_pert_std: float = 0,
-            min_dist=0.8,
-            max_dist=1.2,
-            min_angle_dist: int = 10,
-            target_indices: List[int] = []):
+        self,
+        speaker_lists: List[List[str]],
+        seeds: List[int],
+        target_angles: List[float] = [0.0],
+        reverb: bool = True,
+        rt60_min: float = 0.2,
+        rt60_max: float = 1,
+        snr_min: int = -10,
+        snr_max: int = 5,
+        mic_pert_std: float = 0,
+        min_dist=0.8,
+        max_dist=1.2,
+        min_angle_dist: int = 10,
+        target_indices: List[int] = []
+    ):
         '''Use all cpus to create samples in parallel'''
         processes = []
         manager = mp.Manager()
@@ -412,27 +423,28 @@ def snr_scale_factor(speech: np.ndarray, noise: np.ndarray, snr: int):
     return factor
 
 
-def prep_speaker_mix_data(store_dir: str,
-                          post_fix: str | None = None,
-                          wsj0_path: str = 'whatever',
-                          n_channels: int = 3,
-                          n_interfering_speakers: int = 3,
-                          target_fs: int = 16000,
-                          num_files: dict = {'train': -1,
-                                             'val': -1,
-                                             'test': -1},
-                          angle_settings: dict | None = None,
-                          reverb: bool = True,
-                          side_room: int = 10,
-                          rt60_min=0.2,
-                          rt60_max=0.8,
-                          snr_min=-10,
-                          snr_max=5,
-                          mic_pert=0,
-                          min_dist=0.8,
-                          max_dist=1.2,
-                          batch_size=300,
-                          ):
+def prep_speaker_mix_data(
+    store_dir: str,
+    post_fix: str | None = None,
+    wsj0_path: str = 'whatever',
+    n_channels: int = 3,
+    n_interfering_speakers: int = 3,
+    target_fs: int = 16000,
+    num_files: dict = {'train': -1,
+                       'val': -1,
+                       'test': -1},
+    angle_settings: dict | None = None,
+    reverb: bool = True,
+    side_room: int = 10,
+    rt60_min=0.2,
+    rt60_max=0.8,
+    snr_min=-10,
+    snr_max=5,
+    mic_pert=0,
+    min_dist=0.8,
+    max_dist=1.2,
+    batch_size=300,
+):
     """
     Preparation of speaker mix dataset. The target speaker is placed in a fixed position relative to the microphone
     array. The interfering speakers are placed randomly with one speaker per angle segment.
